@@ -2,6 +2,8 @@
 
 基于 Laravel 5.5， Vue 2， ElementUI 2， vueAdmin-template 制作的后台脚手架。
 
+注：原地址 https://github.com/zgldh/scaffold
+
 预制功能：
 ================
 

@@ -3,7 +3,7 @@ import querystring from 'querystring'
 
 export function buildDataTablesParameters() {
   this.datatablesParameters.draw++
-  this._draw = this.datatablesParameters.draw
+  this._draw = this.datatablesParameters.
   this.datatablesParameters._ = new Date().getTime()
   return this.datatablesParameters
 }

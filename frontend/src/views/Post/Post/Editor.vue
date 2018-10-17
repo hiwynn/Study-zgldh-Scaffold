@@ -1,19 +1,7 @@
-<?php
-/**
- * @var $STARTER  \App\Scaffold\Installer\ModuleStarter
- * @var $MODEL  \App\Scaffold\Installer\Model\ModelDefinition
- * @var $field  \App\Scaffold\Installer\Model\Field
- */
-$modelName = $STARTER->getModuleName();
-$modelPascaleCase = $MODEL->getPascaleCase();
-$modelSnakeCase = $MODEL->getSnakeCase();
-$modelCamelCase = $MODEL->getCamelCase();
-$frontendRoute = $MODEL->getFrontEndRoutePrefix();
-?>
 <template>
-  <el-row class="{{$modelSnakeCase}}-editor-page" v-loading="loading">
+  <el-row class="post-editor-page" v-loading="loading">
     <el-col :span="11">
-      <editor-title :name="$t('{{$modelSnakeCase}}.title')"></editor-title>
+      <editor-title :name="$t('post.title')"></editor-title>
 
       <el-form label-position="right" label-width="80px" :rules="rules" :model="form"
                ref="form">
@@ -21,29 +9,43 @@ $frontendRoute = $MODEL->getFrontEndRoutePrefix();
         <form-item :label="$t('global.fields.id')" v-if="form.id">
           <el-input v-model="form.id" disabled></el-input>
         </form-item>
-        @php
-          use App\Scaffold\Installer\HtmlFields\BaseField;
-          use App\Scaffold\Installer\Model\Field;
-          $fields = $MODEL->getFields();
-          foreach ($fields as $field) {
-              /**
-              * @var $field     Field
-              * @var $baseField BaseField
-              */
-              $baseField = $field->getHtmlType();
-              $fieldHtml = $baseField->html();
-              echo $fieldHtml . "\n";
-          }
-        @endphp
+                    <form-item :label="$t('post.fields.title')" prop="title">
+              <el-input v-model="form.title"></el-input>
+            </form-item>
+            <form-item :label="$t('post.fields.content')" prop="content">
+              <el-input v-model="form.content"></el-input>
+            </form-item>
+            <form-item :label="$t('post.fields.password')" prop="password">
+              <el-input v-model="form.password"></el-input>
+            </form-item>
+            <form-item :label="$t('post.fields.email')" prop="email">
+              <el-input v-model="form.email"></el-input>
+            </form-item>
+            <form-item :label="$t('post.fields.category')" prop="category">
+              <el-input v-model="form.category"></el-input>
+            </form-item>
+            <form-item :label="$t('post.fields.status')" prop="status">
+              <el-input v-model="form.status"></el-input>
+            </form-item>
+            <form-item :label="$t('post.fields.created_by')" prop="created_by">
+              <el-input v-model="form.created_by"></el-input>
+            </form-item>
+            <form-item :label="$t('post.fields.comments')">
+              <multiselect v-model="form.comments" label="id" track-by="id"
+                           :multiple="true" :placeholder="$t('scaffold.terms.input_to_search')" 
+                           open-direction="bottom" :options="_commentsList" :searchable="true" 
+                           @search-change="_queryCommentsList">
+              </multiselect>
+            </form-item>
         <form-item :label="$t('global.fields.created_at')" v-if="form.id">
           <el-input v-model="form.created_at" disabled></el-input>
         </form-item>
 
         <form-item>
           <el-button type="primary" @click="isCreating?onCreate():onUpdate()">
-            @{{$t('global.terms.submit')}}
+            {{$t('global.terms.submit')}}
           </el-button>
-          <el-button @click="$router.go(-1)">@{{$t('global.terms.back')}}</el-button>
+          <el-button @click="$router.go(-1)">{{$t('global.terms.back')}}</el-button>
         </form-item>
       </el-form>
     </el-col>
@@ -55,7 +57,7 @@ $frontendRoute = $MODEL->getFrontEndRoutePrefix();
   import store  from '@/store'
   import { mapState } from 'vuex'
   import { SuccessMessage } from '@/utils/message'
-  import { {{$modelPascaleCase}}Store, {{$modelPascaleCase}}Update, {{$modelPascaleCase}}Show } from '@/api/{{$modelName}}'
+  import { PostStore, PostUpdate, PostShow } from '@/api/Post'
   import EditorMixin from '@/mixins/Editor'
 
   export default  {
@@ -64,7 +66,16 @@ $frontendRoute = $MODEL->getFrontEndRoutePrefix();
     data () {
       return {
         rules: {},
-        form: {!! json_encode($MODEL->getDefaultValues(), JSON_PRETTY_PRINT) !!}
+        form: {
+    "title": null,
+    "content": null,
+    "password": null,
+    "email": null,
+    "category": null,
+    "status": 1,
+    "created_by": null,
+    "comments": null
+}
       };
     },
     computed: {
@@ -101,7 +112,7 @@ $frontendRoute = $MODEL->getFrontEndRoutePrefix();
       fetchData() {
         if (this.$route.params.id) {
           this.loading = true;
-          {{$modelPascaleCase}}Show(this.$route.params.id, '_with=roles')
+          PostShow(this.$route.params.id, '_with=roles')
             .then(res => this.setFormData(res.data))
             .then(res => this.loading = false)
         }
@@ -112,19 +123,19 @@ $frontendRoute = $MODEL->getFrontEndRoutePrefix();
       onCreate () {
         this.$refs.form.validate().then(valid => {
           this.loading = true;
-          return {{$modelPascaleCase}}Store('_with=roles', this.form);
+          return PostStore('_with=roles', this.form);
         })
           .then(SuccessMessage(this.$t('global.terms.save_completed')))
           .then(res => {
             this.loading = false;
-            this.$router.replace({ path: `{{$frontendRoute}}/${this.data.id}/edit` });
+            this.$router.replace({ path: `/post/post/${this.data.id}/edit` });
           })
           .catch(this.errorHandler);
       },
       onUpdate () {
         this.$refs.form.validate().then(valid => {
           this.loading = true;
-          return {{$modelPascaleCase}}Update(this.form.id, '_with=roles', this.form)
+          return PostUpdate(this.form.id, '_with=roles', this.form)
         })
           .then(res => this.setFormData(res.data))
           .then(SuccessMessage(this.$t('global.terms.save_completed')))
@@ -136,7 +147,7 @@ $frontendRoute = $MODEL->getFrontEndRoutePrefix();
 </script>
 
 <style rel="stylesheet/scss" lang="scss">
-  .{{$modelSnakeCase}}-editor-page{
+  .post-editor-page{
     margin: 10px 30px;
   }
 </style>

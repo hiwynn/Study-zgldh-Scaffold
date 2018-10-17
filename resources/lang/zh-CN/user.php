@@ -6,6 +6,7 @@ return [
         [
             'name'          => '用户名',
             'email'         => '电子邮箱',
+            'mobile'        => '手机号码',
             'password'      => '密码',
             'is_active'     => '是否可用',
             'last_login_at' => '上次登录时间',
